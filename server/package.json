@@ -1,0 +1,19 @@
+{
+  "author": "",
+  "license": "ISC",
+  "name": "server",
+  "version": "1.0.0",
+  "description": "the backend",
+  "main": "index.ts",
+  "type": "module",
+  "scripts": {
+    "test": "test",
+    "start": "node index.ts"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6"
+  }
+}
