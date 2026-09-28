@@ -14,7 +14,7 @@ router.get(
 
     // If the query is not a string or is too small,
     // return an empty array to avoid unnecessary API calls.
-    if (typeof query !== 'string' || query.trim().length < 2) return res.json([]);
+    if (typeof query !== 'string' || query.trim().length < 3) return res.json([]);
 
     try {
       const url = `${process.env.API_URL}?input=${encodeURIComponent(query)}`;

@@ -19,17 +19,96 @@ import {
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { Button } from '@/components/ui/button.tsx';
-import { formDefaultValues, formSchema, type FormValues } from '@/schema/form';
+import { type Area, formDefaultValues, formSchema, type FormValues } from '@/schema/form';
 import { ListingType } from '@/types/property.ts';
 import { Input } from '@/components/ui/input.tsx';
+import { type ChangeEvent, useEffect, useRef, useState } from 'react';
+import { useDebounce } from '@/hooks/useDebounce.ts';
+import {
+  Autocomplete,
+  AutocompleteContent,
+  AutocompleteEmpty,
+  AutocompleteInput,
+  AutocompleteItem,
+  AutocompleteList,
+} from '@/components/reui/autocomplete.tsx';
 
 const TITLE_MAX_LENGTH = 155;
+const MIN_AREA_QUERY_LENGTH = 3;
+
+const areaLabel = (area: Area) => `${area.mainText}, ${area.secondaryText}`;
 
 export function Form() {
+  const [query, setQuery] = useState('');
+  const [areas, setAreas] = useState<Area[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Label of the area the input currently matches, so we don't search for it again.
+  const selectedLabel = useRef<string | null>(null);
+  const debouncedQuery = useDebounce<string>(query);
+
+  useEffect(() => {
+    // Don't fetch if the query is too short.'
+    if (debouncedQuery.trim().length < MIN_AREA_QUERY_LENGTH) return;
+
+    // If the user has selected an area, don't query it again.
+    if (debouncedQuery === selectedLabel.current) return;
+
+    let cancelledRequest = false;
+    setLoading(true);
+
+    fetch(`/api/areas?input=${encodeURIComponent(debouncedQuery)}`)
+      .then(async (res) => {
+        if (!res.ok) {
+          // Ignore the error so we can throw it and safely catch it later.
+          const error = await res.json().catch(() => null);
+          throw new Error(error?.message || 'Failed to fetch areas');
+        }
+
+        return res.json();
+      })
+      .then((data: Area[]) => {
+        if (!cancelledRequest) setAreas(data);
+      })
+      .catch((err: Error) => {
+        console.error(err);
+        setAreas([]);
+      })
+      .finally(() => {
+        if (!cancelledRequest) setLoading(false);
+      });
+
+    // Cancel the request if the component is unmounted
+    // or the query changes, to avoid race conditions
+    return () => {
+      cancelledRequest = true;
+    };
+  }, [debouncedQuery]);
+
   const { handleSubmit, control, reset } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: formDefaultValues,
   });
+
+  const handleValueChange = (value: string, onChange: (area: Area | undefined) => void) => {
+    // The value is only a valid area when the text matches a suggestion.
+    const area = areas.find((area) => areaLabel(area) === value);
+
+    selectedLabel.current = area ? value : null;
+    setQuery(value);
+
+    if (value.trim().length < MIN_AREA_QUERY_LENGTH) setAreas([]);
+    onChange(area);
+  };
+
+  const handlePriceChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    onChange: (price: number | undefined) => void
+  ) => {
+    // Keep digits only, so the price is always a whole number.
+    const digits = e.target.value.replace(/\D/g, '');
+    onChange(digits === '' ? undefined : Number(digits));
+  };
 
   const onSubmit: SubmitHandler<FormValues> = (data: FormValues) => {
     console.log(data);
@@ -112,18 +191,40 @@ export function Form() {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="property_area">Area*</FieldLabel>
-                  <Input
-                    {...field}
-                    id="property_area"
-                    aria-invalid={fieldState.invalid}
-                    type="search"
-                    placeholder="Type in the property's area"
-                    autoComplete="off"
-                    onChange={(e) => {
-                      console.log(e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
+                  <Autocomplete
+                    name={field.name}
+                    items={areas}
+                    itemToStringValue={areaLabel}
+                    filter={null}
+                    value={query}
+                    onValueChange={(value) => handleValueChange(value, field.onChange)}
+                  >
+                    <AutocompleteInput
+                      ref={field.ref}
+                      id="property_area"
+                      placeholder="Type in the property's area"
+                      aria-invalid={fieldState.invalid}
+                      onBlur={field.onBlur}
+                      showTrigger
+                      showClear
+                    />
+                    <AutocompleteContent>
+                      <AutocompleteEmpty>
+                        {loading ? 'Searching...' : 'No areas found'}
+                      </AutocompleteEmpty>
+
+                      <AutocompleteList>
+                        {(area: Area) => (
+                          <AutocompleteItem key={area.placeId} value={area}>
+                            {area.mainText},{' '}
+                            <span className="text-muted-foreground text-xs">
+                              {area.secondaryText}
+                            </span>
+                          </AutocompleteItem>
+                        )}
+                      </AutocompleteList>
+                    </AutocompleteContent>
+                  </Autocomplete>
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}
@@ -138,10 +239,7 @@ export function Form() {
                   <Input
                     {...field}
                     value={field.value ?? ''}
-                    onChange={(e) => {
-                      const digits = e.target.value.replace(/\D/g, '');
-                      field.onChange(digits === '' ? undefined : Number(digits));
-                    }}
+                    onChange={(e) => handlePriceChange(e, field.onChange)}
                     id="property_price"
                     aria-invalid={fieldState.invalid}
                     placeholder="Amount"
@@ -178,7 +276,15 @@ export function Form() {
       <CardFooter>
         <Field orientation="horizontal">
           {/* Reset button*/}
-          <Button type="button" variant="outline" onClick={() => reset()}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              reset();
+              setQuery('');
+              setAreas([]);
+            }}
+          >
             Reset
           </Button>
           {/* Submit button*/}
