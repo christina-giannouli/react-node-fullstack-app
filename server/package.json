@@ -6,6 +6,7 @@
   "description": "the backend",
   "main": "index.ts",
   "type": "module",
+  "engines": { "node": ">=22" },
   "scripts": {
     "test": "test",
     "start": "node index.ts",
@@ -21,6 +22,8 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
-    "prettier": "^3.9.9"
+    "@types/node": "^22.20.4",
+    "prettier": "^3.9.9",
+    "typescript": "^6.0.3"
   }
 }
