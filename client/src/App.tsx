@@ -10,7 +10,7 @@ function App() {
           <Form />
           <Toaster
             position="top-center"
-            duration={38000}
+            duration={6000}
             visibleToasts={3}
             richColors
             closeButton

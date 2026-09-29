@@ -22,8 +22,8 @@ import { Button } from '@/components/ui/button.tsx';
 import { type Area, formDefaultValues, formSchema, type FormValues } from '@/schema/form';
 import { ListingType } from '@/types/property.ts';
 import { Input } from '@/components/ui/input.tsx';
-import { type ChangeEvent, useEffect, useRef, useState } from 'react';
-import { useDebounce } from '@/hooks/useDebounce.ts';
+import { type ChangeEvent } from 'react';
+import { areaLabel, useAreaSearch } from '@/hooks/useAreaSearch.ts';
 import {
   Autocomplete,
   AutocompleteContent,
@@ -32,62 +32,11 @@ import {
   AutocompleteItem,
   AutocompleteList,
 } from '@/components/reui/autocomplete.tsx';
-import { toast } from 'sonner';
 
 const TITLE_MAX_LENGTH = 155;
-const MIN_AREA_QUERY_LENGTH = 3;
-
-const areaLabel = (area: Area) => `${area.mainText}, ${area.secondaryText}`;
 
 export function Form() {
-  const [query, setQuery] = useState('');
-  const [areas, setAreas] = useState<Area[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  // Label of the area the input currently matches, so we don't search for it again.
-  const selectedLabel = useRef<string | null>(null);
-  const debouncedQuery = useDebounce<string>(query);
-
-  useEffect(() => {
-    // Don't fetch if the query is too short.'
-    if (debouncedQuery.trim().length < MIN_AREA_QUERY_LENGTH) return;
-
-    // If the user has selected an area, don't query it again.
-    if (debouncedQuery === selectedLabel.current) return;
-
-    let cancelledRequest = false;
-    setLoading(true);
-
-    fetch(`/api/areas?input=${encodeURIComponent(debouncedQuery)}`)
-      .then(async (res) => {
-        if (!res.ok) {
-          // Ignore the error so we can throw it and safely catch it later.
-          const error = await res.json().catch(() => null);
-          throw new Error(error?.message || 'Failed to fetch areas');
-        }
-
-        return res.json();
-      })
-      .then((data: Area[]) => {
-        if (!cancelledRequest) setAreas(data);
-      })
-      .catch((err: Error) => {
-        // Ignore failures from outdated requests, the user has already moved on.
-        if (cancelledRequest) return;
-
-        toast.error(err.message);
-        setAreas([]);
-      })
-      .finally(() => {
-        if (!cancelledRequest) setLoading(false);
-      });
-
-    // Cancel the request if the component is unmounted
-    // or the query changes, to avoid race conditions
-    return () => {
-      cancelledRequest = true;
-    };
-  }, [debouncedQuery]);
+  const { query, areas, loading, updateQuery, reset: resetAreaSearch } = useAreaSearch();
 
   const { handleSubmit, control, reset } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -95,14 +44,7 @@ export function Form() {
   });
 
   const handleValueChange = (value: string, onChange: (area: Area | undefined) => void) => {
-    // The value is only a valid area when the text matches a suggestion.
-    const area = areas.find((area) => areaLabel(area) === value);
-
-    selectedLabel.current = area ? value : null;
-    setQuery(value);
-
-    if (value.trim().length < MIN_AREA_QUERY_LENGTH) setAreas([]);
-    onChange(area);
+    onChange(updateQuery(value));
   };
 
   const handlePriceChange = (
@@ -284,8 +226,7 @@ export function Form() {
             variant="outline"
             onClick={() => {
               reset();
-              setQuery('');
-              setAreas([]);
+              resetAreaSearch();
             }}
           >
             Reset
