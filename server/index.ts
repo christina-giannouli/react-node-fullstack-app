@@ -1,10 +1,12 @@
 import express, { type Express, type Request, type Response } from 'express';
 import cors from 'cors';
-import 'dotenv/config';
+import dotenv from 'dotenv';
 import areasRouter from './src/routes/areas.ts';
 
+dotenv.config({ path: ['.env.local', '.env'] });
+
 const app: Express = express();
-const PORT = process.env.APP_PORT ?? 3000;
+const PORT = process.env.APP_PORT || 3000;
 
 // Enable CORS for all requests
 app.use(cors());
