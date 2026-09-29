@@ -22,7 +22,13 @@ export const formSchema = z.object({
   type: z.enum(ListingType, { error: 'Property listing type is required.' }),
   area: areaSchema,
   price: z
-    .int({ error: 'Property price is required.' })
+    .int({
+      // Only a missing price is "required"; any other number that isn't whole gets its own message.
+      error: (issue) =>
+        issue.input === undefined
+          ? 'Property price is required.'
+          : 'Property price must be a whole number.',
+    })
     .positive('Property price must be greater than 0.'),
   description: z.string().optional(),
 });
