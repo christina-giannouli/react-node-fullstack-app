@@ -1,6 +1,8 @@
 import { Router, type Request, type Response } from 'express';
 import { areasResponseSchema } from '../schema/areas.ts';
-import type { AreaResponse, AreasQuery, ErrorResponse } from '../types/areas.ts';
+import type { AreaResponse, AreasQuery } from '../types/areas.ts';
+import type { ErrorResponse } from '../types/errors.ts';
+import { handleError } from '../utils/handleError.ts';
 
 const router = Router();
 
@@ -21,20 +23,13 @@ router.get(
       const response = await fetch(url);
 
       if (!response.ok) {
-        const errorData = (await response.json()) as ErrorResponse;
-        return res.status(errorData.status).json(errorData);
+        return handleError(res, response.status, 'Failed to fetch areas.');
       }
 
       const data = areasResponseSchema.parse(await response.json());
-      res.json(data);
-    } catch (error) {
-      const err = {
-        debugMessage: error instanceof Error ? error.message : null,
-        message: 'An error occurred while fetching areas.',
-        status: 500,
-        timestamp: new Date().toISOString(),
-      };
-      res.status(500).json(err);
+      return res.json(data);
+    } catch (error: unknown) {
+      return handleError(res, 500, 'An error occurred while fetching areas.', error);
     }
   }
 );

@@ -32,6 +32,7 @@ import {
   AutocompleteItem,
   AutocompleteList,
 } from '@/components/reui/autocomplete.tsx';
+import { toast } from 'sonner';
 
 const TITLE_MAX_LENGTH = 155;
 const MIN_AREA_QUERY_LENGTH = 3;
@@ -71,7 +72,10 @@ export function Form() {
         if (!cancelledRequest) setAreas(data);
       })
       .catch((err: Error) => {
-        console.error(err);
+        // Ignore failures from outdated requests, the user has already moved on.
+        if (cancelledRequest) return;
+
+        toast.error(err.message);
         setAreas([]);
       })
       .finally(() => {
@@ -205,7 +209,6 @@ export function Form() {
                       placeholder="Type in the property's area"
                       aria-invalid={fieldState.invalid}
                       onBlur={field.onBlur}
-                      showTrigger
                       showClear
                     />
                     <AutocompleteContent>
