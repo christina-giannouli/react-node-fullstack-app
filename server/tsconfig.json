@@ -15,5 +15,5 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true
   },
-  "include": ["index.ts", "src"]
+  "include": ["index.ts", "app.ts", "src"]
 }
