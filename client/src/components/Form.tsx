@@ -32,13 +32,24 @@ import {
   AutocompleteItem,
   AutocompleteList,
 } from '@/components/reui/autocomplete.tsx';
+import { saveProperty } from '@/api/properties.ts';
+import { toast } from 'sonner';
 
 const TITLE_MAX_LENGTH = 155;
 
-export function Form() {
+interface FormProps {
+  onViewListings?: () => void;
+}
+
+export function Form({ onViewListings }: FormProps) {
   const { query, areas, loading, updateQuery, reset: resetAreaSearch } = useAreaSearch();
 
-  const { handleSubmit, control, reset } = useForm<FormValues>({
+  const {
+    handleSubmit,
+    control,
+    reset,
+    formState: { isSubmitting },
+  } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: formDefaultValues,
   });
@@ -56,8 +67,21 @@ export function Form() {
     onChange(digits === '' ? undefined : Number(digits));
   };
 
-  const onSubmit: SubmitHandler<FormValues> = (data: FormValues) => {
-    console.log(data);
+  const handleReset = () => {
+    reset();
+    resetAreaSearch();
+  };
+
+  const onSubmit: SubmitHandler<FormValues> = async (data: FormValues) => {
+    try {
+      const property = await saveProperty(data);
+      toast.success(`"${property.title}" successfully saved.`, {
+        action: onViewListings && { label: 'See your listings', onClick: onViewListings },
+      });
+      handleReset();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to save property');
+    }
   };
 
   return (
@@ -221,19 +245,12 @@ export function Form() {
       <CardFooter>
         <Field orientation="horizontal">
           {/* Reset button*/}
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              reset();
-              resetAreaSearch();
-            }}
-          >
+          <Button type="button" variant="outline" onClick={handleReset}>
             Reset
           </Button>
           {/* Submit button*/}
-          <Button type="submit" form="xe_property_classification">
-            Submit
+          <Button type="submit" form="xe_property_classification" disabled={isSubmitting}>
+            {isSubmitting ? 'Saving...' : 'Submit'}
           </Button>
         </Field>
       </CardFooter>
