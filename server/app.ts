@@ -1,6 +1,7 @@
 import express, { type Express, type Request, type Response } from 'express';
 import cors from 'cors';
 import areasRouter from './src/routes/areas.ts';
+import propertiesRouter from './src/routes/properties.ts';
 
 const app: Express = express();
 
@@ -8,6 +9,7 @@ const app: Express = express();
 app.use(cors());
 app.use(express.json());
 app.use('/api/areas', areasRouter);
+app.use('/api/properties', propertiesRouter);
 
 app.get('/', (_req: Request, res: Response) => {
   res.send('Hello World!');
