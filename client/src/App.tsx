@@ -1,18 +1,16 @@
 import './App.css';
-import { Form } from '@/components/Form.tsx';
+import { NewProperty } from '@/pages/NewProperty.tsx';
 import { Properties } from '@/pages/Properties.tsx';
 import { Toaster } from 'sonner';
-import { Route, Routes, useNavigate } from 'react-router';
+import { Route, Routes } from 'react-router';
 
 function App() {
-  const navigate = useNavigate();
-
   return (
     <div className="container">
       <div className="flex min-h-screen flex-col justify-center py-8">
         <div className="mx-auto w-full px-5 sm:max-w-md lg:px-0">
           <Routes>
-            <Route path="/" element={<Form onViewListings={() => navigate('/properties')} />} />
+            <Route path="/" element={<NewProperty />} />
             <Route path="/properties" element={<Properties />} />
           </Routes>
           <Toaster

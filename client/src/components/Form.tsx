@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea.tsx';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card.tsx';
+import { Card, CardContent, CardFooter } from '@/components/ui/card.tsx';
 import { Button } from '@/components/ui/button.tsx';
 import { type Area, formDefaultValues, formSchema, type FormValues } from '@/schema/form';
 import { ListingType } from '@/types/property.ts';
@@ -86,9 +86,6 @@ export function Form({ onViewListings }: FormProps) {
 
   return (
     <Card className="w-full sm:max-w-md">
-      <CardHeader>
-        <CardTitle className="text-2xl">New property classified</CardTitle>
-      </CardHeader>
       <CardContent>
         <form id="xe_property_classification" onSubmit={handleSubmit(onSubmit)}>
           <FieldGroup>
