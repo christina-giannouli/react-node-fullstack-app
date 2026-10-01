@@ -1,6 +1,6 @@
 import * as z from 'zod';
 import type { DefaultValues } from 'react-hook-form';
-import { ListingType } from '@/types/property.ts';
+import { ListingType, type PropertyInput } from '@/types/property.ts';
 
 export const areaSchema = z.object(
   {
@@ -31,7 +31,8 @@ export const formSchema = z.object({
     })
     .positive('Property price must be greater than 0.'),
   description: z.string().optional(),
-});
+  // Type error here if the rules stop matching the shared PropertyInput type.
+}) satisfies z.ZodType<PropertyInput>;
 
 export type FormValues = z.infer<typeof formSchema>;
 

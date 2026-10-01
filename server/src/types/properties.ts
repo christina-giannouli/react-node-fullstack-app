@@ -1,6 +1,5 @@
 import type { UUID } from 'node:crypto';
-import type { z } from 'zod';
-import type { propertySchema } from '../schema/properties.ts';
+import type { Property } from 'shared/types/property.ts';
 
-// z.uuid() checks the format but infers a plain string, so narrow the id to a UUID type.
-export type PropertyResponse = z.infer<typeof propertySchema> & { id: UUID };
+// The server always creates the id with randomUUID(), so narrow it to a UUID type.
+export type PropertyResponse = Property & { id: UUID };

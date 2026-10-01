@@ -1,13 +1,7 @@
-import type { FormValues } from '@/schema/form.ts';
-
-export const ListingType = {
-  rent: 'Rent',
-  buy: 'Buy',
-  exchange: 'Exchange',
-  donation: 'Donation',
-} as const;
-
-export type Property = FormValues & {
-  id: string;
-  createdAt: string;
-};
+// Property types are shared with the server; see shared/types/property.ts.
+export {
+  ListingType,
+  type Area,
+  type Property,
+  type PropertyInput,
+} from '@shared/types/property.ts';

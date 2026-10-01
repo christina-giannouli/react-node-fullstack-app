@@ -1,0 +1,6 @@
+{
+  "name": "shared",
+  "private": true,
+  "description": "Types shared by the client and the server. No dependencies, so no install is needed.",
+  "type": "module"
+}
