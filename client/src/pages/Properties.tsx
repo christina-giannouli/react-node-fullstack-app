@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { getProperties } from '@/api/properties.ts';
 import { Button } from '@/components/ui/button.tsx';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card.tsx';
+import { Skeleton } from '@/components/ui/skeleton.tsx';
 import { areaLabel } from '@/hooks/useAreaSearch.ts';
 import type { Property } from '@/types/property.ts';
 import { toast } from 'sonner';
@@ -46,24 +47,35 @@ export function Properties() {
         </Button>
       </div>
 
-      {loading && <p className="text-muted-foreground">Loading...</p>}
       {!loading && properties.length === 0 && (
         <p className="text-muted-foreground">You have no listings yet.</p>
       )}
 
       {/* 1 column on phones, 2 on tablets (from 640px), 3 on desktop (from 1024px). */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-busy={loading}>
+        {loading && (
+          <>
+            <span className="sr-only">Loading listings...</span>
+            {[1, 2, 3].map((i) => (
+              <PropertyCardSkeleton key={i} />
+            ))}
+          </>
+        )}
         {properties.map((property) => (
           <Card key={property.id}>
             <CardHeader>
-              <CardTitle className='text-lg font-bold text-secondary-ink tracking-tight'>{property.title}</CardTitle>
+              <CardTitle className="text-secondary-ink text-lg font-bold tracking-tight">
+                {property.title}
+              </CardTitle>
               <p className="text-muted-foreground text-sm">
                 {property.type} · {areaLabel(property.area)}
               </p>
             </CardHeader>
             {/* flex-1 pushes the footer to the bottom, so dates line up across a grid row. */}
             <CardContent className="flex flex-1 flex-col gap-2">
-              <p className="font-bold text-lg tracking-tight">{priceFormat.format(property.price)}</p>
+              <p className="text-lg font-bold tracking-tight">
+                {priceFormat.format(property.price)}
+              </p>
               {property.description && <p className="text-sm">{property.description}</p>}
             </CardContent>
             <CardFooter>
@@ -75,5 +87,25 @@ export function Properties() {
         ))}
       </div>
     </div>
+  );
+}
+
+// Placeholder shaped like a listing card: title, type · area, price, description, date.
+function PropertyCardSkeleton() {
+  return (
+    <Card aria-hidden="true">
+      <CardHeader className="flex flex-col gap-2">
+        <Skeleton className="h-6 w-3/4" />
+        <Skeleton className="h-4 w-1/2" />
+      </CardHeader>
+      <CardContent className="flex flex-1 flex-col gap-2">
+        <Skeleton className="h-6 w-1/3" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
+      </CardContent>
+      <CardFooter>
+        <Skeleton className="h-3 w-2/5" />
+      </CardFooter>
+    </Card>
   );
 }
