@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { getProperties } from '@/api/properties.ts';
 import { Button } from '@/components/ui/button.tsx';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.tsx';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { areaLabel } from '@/hooks/useAreaSearch.ts';
 import type { Property } from '@/types/property.ts';
 import { toast } from 'sonner';
@@ -38,10 +38,10 @@ export function Properties() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-4">
+      <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Your listings</h1>
-        <Button asChild className="h-8" variant="outline" size="sm" disabled={loading}>
+        <Button asChild className="h-8" variant="outline-white" size="sm">
           <Link to="/">Add a property</Link>
         </Button>
       </div>
@@ -51,23 +51,29 @@ export function Properties() {
         <p className="text-muted-foreground">You have no listings yet.</p>
       )}
 
-      {properties.map((property) => (
-        <Card key={property.id}>
-          <CardHeader>
-            <CardTitle>{property.title}</CardTitle>
-            <p className="text-muted-foreground text-sm">
-              {property.type} · {areaLabel(property.area)}
-            </p>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-2">
-            <p className="font-medium">{priceFormat.format(property.price)}</p>
-            {property.description && <p className="text-sm">{property.description}</p>}
-            <p className="text-muted-foreground text-xs">
-              Listed on {new Date(property.createdAt).toLocaleDateString()}
-            </p>
-          </CardContent>
-        </Card>
-      ))}
+      {/* 1 column on phones, 2 on tablets (from 640px), 3 on desktop (from 1024px). */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {properties.map((property) => (
+          <Card key={property.id}>
+            <CardHeader>
+              <CardTitle className='text-lg font-bold text-secondary-ink tracking-tight'>{property.title}</CardTitle>
+              <p className="text-muted-foreground text-sm">
+                {property.type} · {areaLabel(property.area)}
+              </p>
+            </CardHeader>
+            {/* flex-1 pushes the footer to the bottom, so dates line up across a grid row. */}
+            <CardContent className="flex flex-1 flex-col gap-2">
+              <p className="font-bold text-lg tracking-tight">{priceFormat.format(property.price)}</p>
+              {property.description && <p className="text-sm">{property.description}</p>}
+            </CardContent>
+            <CardFooter>
+              <p className="text-muted-foreground text-xs">
+                Listed on {new Date(property.createdAt).toLocaleDateString()}
+              </p>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }

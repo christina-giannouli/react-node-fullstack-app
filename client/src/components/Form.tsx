@@ -85,7 +85,7 @@ export function Form({ onViewListings }: FormProps) {
   };
 
   return (
-    <Card className="w-full sm:max-w-md">
+    <Card className="w-full">
       <CardContent>
         <form id="xe_property_classification" onSubmit={handleSubmit(onSubmit)}>
           <FieldGroup>
@@ -102,12 +102,12 @@ export function Form({ onViewListings }: FormProps) {
                       id="property_title"
                       aria-invalid={fieldState.invalid}
                       type="text"
-                      placeholder="Classified title up to 155 chars"
+                      placeholder="Title up to 155 chars"
                       autoComplete="off"
                     ></InputGroupInput>
-                    <InputGroupAddon align="block-end">
+                    <InputGroupAddon align="inline-end">
                       <InputGroupText className="tabular-nums">
-                        {field.value.length}/{TITLE_MAX_LENGTH} characters
+                        {field.value.length}/{TITLE_MAX_LENGTH}
                       </InputGroupText>
                     </InputGroupAddon>
                   </InputGroup>
@@ -240,13 +240,18 @@ export function Form({ onViewListings }: FormProps) {
         </form>
       </CardContent>
       <CardFooter>
-        <Field orientation="horizontal">
+        <Field orientation="horizontal" className="justify-end">
           {/* Reset button*/}
-          <Button type="button" variant="outline" onClick={handleReset}>
+          <Button type="button" variant="outline" className="w-28" onClick={handleReset}>
             Reset
           </Button>
           {/* Submit button*/}
-          <Button type="submit" form="xe_property_classification" disabled={isSubmitting}>
+          <Button
+            type="submit"
+            form="xe_property_classification"
+            className="w-28"
+            disabled={isSubmitting}
+          >
             {isSubmitting ? 'Saving...' : 'Submit'}
           </Button>
         </Field>

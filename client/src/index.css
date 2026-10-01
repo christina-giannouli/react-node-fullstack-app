@@ -7,28 +7,33 @@
   --primary: oklch(0.6927 0.1649 137.72); /* #65b345 */
   --primary-hover: oklch(0.7796 0.119 136.76); /* #93c97c */
   --secondary: oklch(0.8157 0.166 79.34); /* #fbb415 */
-  --accent: oklch(0.8588 0.0166 245.11); /* #C8D2DB */
-  --background: oklch(0.9869 0.0025 228.78); /* #F9FBFC */
+  --accent: oklch(0.94 0.065 86); /* #FFE9BA, light yellow: highlighted dropdown option */
+  --background: oklch(0.988 0.003 84.559); /* #F9FBFC */
+  --background-gradient-start: oklch(0.8157 0.166 79.34); /* #fbb415 */
+  --background-gradient-end: oklch(0.9673 0.034 84.59); /* #FFF3DB */
 
   /* -- text colours -- */
   --ink: oklch(0.1297 0.0171 298.93); /* #08060d */
   --muted-ink: oklch(0.5135 0.0296 305.45); /* #6b6375 */
+  --secondary-ink: oklch(0.5078 0.108 73.3); /* #8a5a00, dark amber text on yellow surfaces */
 
   /* -- surfaces -- */
-  --popover: oklch(1 0 0); /* select / combobox dropdowns */
+  --popover: oklch(0.982 0.03 86); /* #FFF8E3, light yellow: select / autocomplete dropdowns */
   --popover-ink: var(--ink);
-  --muted: oklch(0.956 0.0059 239.82); /* #EDF1F4 */
+  --muted: oklch(0.956 0.025 85); /* #F8F0DE */
 
   /* -- lines & focus -- */
-  --border: oklch(0.8588 0.0166 245.11); /* #C8D2DB */
-  --input: oklch(0.8588 0.0166 245.11); /* #C8D2DB */
+  --border: oklch(0.8588 0.045 84); /* #DFCFB0 */
+  --input: oklch(0.8588 0.045 84); /* #DFCFB0, warm beige field border */
+  --input-focus: oklch(0.72 0.07 80); /* #BCA072 */
+  --field: oklch(0.995 0.005 85); /* #FFFDFA */
   --ring: oklch(0.6927 0.1649 137.72); /* #65b345 */
 
   --destructive: oklch(0.577 0.245 27.325); /* invalid fields, errors */
 
   /* -- typography -- */
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --sans: 'Roboto Variable', Roboto, system-ui, 'Segoe UI', sans-serif;
+  --heading: 'Roboto Variable', Roboto, system-ui, 'Segoe UI', sans-serif;
 
   --text: var(--muted-ink);
   --text-h: var(--ink);
@@ -63,6 +68,7 @@
   --color-primary-hover: var(--primary-hover);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--ink);
+  --color-secondary-ink: var(--secondary-ink);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-ink);
   --color-accent: var(--accent);
@@ -70,6 +76,8 @@
   --color-destructive: var(--destructive);
   --color-border: var(--border);
   --color-input: var(--input);
+  --color-input-focus: var(--input-focus);
+  --color-field: var(--field);
   --color-ring: var(--ring);
 }
 
@@ -90,6 +98,14 @@
    --------------------------------------------------------------------------- */
 body {
   margin: 0;
+  /* Yellow fading to a very light shade of it. */
+  background-image: linear-gradient(
+    160deg,
+    var(--background-gradient-start) 0%,
+    var(--background-gradient-end) 100%
+  );
+  /* Keep the gradient in place while long pages (the listings) scroll. */
+  background-attachment: fixed;
 }
 
 #root {
@@ -106,7 +122,9 @@ h1,
 h2 {
   font-family: var(--heading);
   font-weight: 500;
-  color: var(--ink);
+  color: white;
+  /* Gives the white text an edge on the light parts of the yellow background. */
+  text-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
 }
 
 p {
