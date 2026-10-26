@@ -1,4 +1,4 @@
-# xe-code-challenge
+# React.js and Node.js fullstack app
 
 ---
 
